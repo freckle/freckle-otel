@@ -5,7 +5,7 @@ cabal-version: 1.18
 -- see: https://github.com/sol/hpack
 
 name:           freckle-otel
-version:        0.0.0.2
+version:        0.0.0.3
 synopsis:       Some extensions to the hs-opentelemetry-sdk library
 description:    Please see README.md
 category:       OpenTelemetry, Telemetry, Monitoring, Observability, Metrics
