@@ -153,7 +153,7 @@ spec = withApp loadApp $ do
           fmap snd headerTraceParent
             `shouldBe` Just (spanIdToHex $ Trace.spanId spanContext)
 
-assertCurrentSpanContext :: (MonadIO m, HasCallStack) => m Trace.SpanContext
+assertCurrentSpanContext :: (HasCallStack, MonadIO m) => m Trace.SpanContext
 assertCurrentSpanContext =
   getCurrentSpanContext >>= \case
     Nothing -> expectationFailure "Expect there to be a SpanContext"
@@ -169,5 +169,5 @@ fromTraceParent a = do
   [traceId, spanId] <- Just $ T.splitOn "-" c
   pure (traceId, spanId)
 
-expectationFailure :: (MonadIO m, HasCallStack) => String -> m a
+expectationFailure :: (HasCallStack, MonadIO m) => String -> m a
 expectationFailure msg = Hspec.expectationFailure msg >> error "unreachable"

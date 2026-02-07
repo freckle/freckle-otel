@@ -71,7 +71,7 @@ newtype CustomTraceContext = CustomTraceContext
   { traceHeaders :: [(Text, Text)]
   }
   deriving stock (Generic)
-  deriving newtype (Semigroup, Monoid)
+  deriving newtype (Monoid, Semigroup)
   deriving anyclass (FromJSON, ToJSON)
 
 instance HasHeaders CustomTraceContext where
@@ -85,7 +85,7 @@ decode = bimap (T.decodeUtf8 . CI.original) T.decodeUtf8
 
 -- | Update our trace context from that extracted from the given item's headers
 extractContext
-  :: (MonadIO m, MonadTracer m, HasHeaders a) => a -> m ()
+  :: (HasHeaders a, MonadIO m, MonadTracer m) => a -> m ()
 extractContext a = do
   context <- getContext
   propagator <- getPropagator
@@ -94,7 +94,7 @@ extractContext a = do
 
 -- | Inject our trace context into the given item's headers
 injectContext
-  :: (MonadIO m, MonadTracer m, HasHeaders a) => a -> m a
+  :: (HasHeaders a, MonadIO m, MonadTracer m) => a -> m a
 injectContext a = do
   context <- getContext
   propagator <- getPropagator
@@ -107,11 +107,11 @@ getPropagator =
 
 -- | Process an item (a request, a Job, etc) in a top-level span and context
 processWithContext
-  :: ( MonadUnliftIO m
+  :: ( HasCallStack
+     , HasHeaders a
      , MonadMask m
      , MonadTracer m
-     , HasHeaders a
-     , HasCallStack
+     , MonadUnliftIO m
      )
   => Text
   -- ^ Span name
