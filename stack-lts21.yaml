@@ -2,6 +2,7 @@ resolver: lts-21.25
 
 extra-deps:
   - Blammo-2.1.0.0
+  - fast-logger-3.2.3
   - freckle-env-0.0.1.2
   - hs-opentelemetry-api-0.1.0.0
   - hs-opentelemetry-sdk-0.0.3.6
