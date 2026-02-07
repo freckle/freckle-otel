@@ -1,4 +1,4 @@
-resolver: nightly-2025-12-01
+resolver: nightly-2026-02-05
 
 extra-deps:
   - freckle-env-0.0.1.2
