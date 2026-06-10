@@ -19,11 +19,8 @@
 -- You may need to do this even if you don't plan to manually trace things, in
 -- order to satisfy the 'MonadTracer' constraint required by functions like
 -- 'runDB'. If you don't need this feature, and don't plan on running an
--- otel-collector, set @OTEL_TRACES_EXPORTER=none@ in the environment, which
--- makes all tracing a no-op.
---
--- In the future, it should be possible to use @OTEL_SDK_DISABLED@ for the same
--- purpose. See <https://github.com/iand675/hs-opentelemetry/issues/60>.
+-- otel-collector, set @OTEL_SDK_DISABLED=true@ in the environment, to
+-- disable any actual tracing.
 module Freckle.App.OpenTelemetry
   ( HasTracer (..)
   , Tracer
