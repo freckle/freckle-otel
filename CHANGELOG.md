@@ -1,5 +1,9 @@
 ## [_Unreleased_](https://github.com/freckle/freckle-otel/compare/v0.0.0.3...main)
 
+Drops support for GHC 9.2 (`lts-20`) and GHC 9.4 (`lts-21`). `hs-opentelemetry-sdk`'s OTLP
+exporter now depends on a `tls`/`crypton` stack too recent to satisfy against those two
+snapshots. `lts-22` (GHC 9.6) is now the oldest supported resolver.
+
 Require `hs-opentelemetry-api` and `hs-opentelemetry-sdk` at `1.0.0.0` or later. A few behavior
 changes from that upgrade are visible through this package's own functions:
 
