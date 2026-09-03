@@ -30,6 +30,7 @@ import Freckle.App.OpenTelemetry
   , SpanArguments
   , inSpan
   )
+import Freckle.App.OpenTelemetry.Compat (getTracerProviderPropagators)
 import Freckle.App.OpenTelemetry.ThreadContext (withTraceContext)
 import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
@@ -39,10 +40,7 @@ import Network.HTTP.Types.Header (Header)
 import OpenTelemetry.Context (Context)
 import OpenTelemetry.Context.ThreadLocal (attachContext, getContext)
 import OpenTelemetry.Propagator (Propagator, extract, inject)
-import OpenTelemetry.Trace.Core
-  ( getTracerProviderPropagators
-  , getTracerTracerProvider
-  )
+import OpenTelemetry.Trace.Core (getTracerTracerProvider)
 import UnliftIO (MonadUnliftIO)
 
 class HasHeaders a where

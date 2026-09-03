@@ -32,6 +32,7 @@ library
       Freckle.App.OpenTelemetry.Http
       Freckle.App.OpenTelemetry.ThreadContext
   other-modules:
+      Freckle.App.OpenTelemetry.Compat
       Paths_freckle_otel
   hs-source-dirs:
       library

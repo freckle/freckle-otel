@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 -- | Application tracing via <https://opentelemetry.io/>
 --
 -- @
@@ -71,9 +73,14 @@ import Data.Text (Text)
 import Data.Text qualified as T
 import Data.Text.Encoding qualified as T
 import Data.Text.Encoding.Error qualified as T
+import Freckle.App.OpenTelemetry.Compat (shutdownTracerProvider)
 import OpenTelemetry.Context (lookupSpan)
 import OpenTelemetry.Context.ThreadLocal (getContext)
-import OpenTelemetry.Trace hiding (inSpan)
+#if MIN_VERSION_hs_opentelemetry_sdk(1,0,0)
+import OpenTelemetry.Trace hiding (inSpan, shutdownTracerProvider, withTracerProvider)
+#else
+import OpenTelemetry.Trace hiding (inSpan, shutdownTracerProvider)
+#endif
 import OpenTelemetry.Trace.Core (getSpanContext)
 import OpenTelemetry.Trace.Core qualified as Trace (SpanContext (..))
 import OpenTelemetry.Trace.Id

@@ -54,6 +54,9 @@ default-extensions:
 
 library:
   source-dirs: library
+  other-modules:
+    - Freckle.App.OpenTelemetry.Compat
+    - Paths_freckle_otel
   dependencies:
     - Blammo
     - aeson
