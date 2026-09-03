@@ -9,6 +9,7 @@ import Blammo.Logging.LogSettings (defaultLogSettings)
 import Blammo.Logging.Logger (Logger, newTestLogger)
 import Blammo.Logging.Setup (HasLogger (..))
 import Control.Lens (lens)
+import Control.Monad (void)
 import Control.Monad.IO.Class (MonadIO)
 import Data.List qualified as List
 import Data.Text (Text)
@@ -18,6 +19,8 @@ import Freckle.App.OpenTelemetry
 import Freckle.App.OpenTelemetry.Context
 import GHC.Stack (HasCallStack)
 import Network.HTTP.Types.Header (Header)
+import OpenTelemetry.Exporter.Span (ExportResult (..), SpanExporter (..))
+import OpenTelemetry.Registry (registerSpanExporterFactoryIfAbsent)
 import OpenTelemetry.Trace.Core qualified as Trace
 import Test.Hspec (Spec, describe, it)
 import Test.Hspec.Expectations.Lifted
@@ -42,9 +45,24 @@ loadApp :: (App -> IO ()) -> IO ()
 loadApp f = do
   appLogger <- newTestLogger defaultLogSettings
 
+  -- A TracerProvider with no SpanProcessor never attaches its spans to
+  -- context, so getCurrentSpanContext wouldn't see them; register a no-op
+  -- exporter so one exists without actually exporting anywhere
+  void
+    $ registerSpanExporterFactoryIfAbsent "freckle-otel-test-noop"
+    $ pure noopSpanExporter
+
   withTracerProvider $ \tracerProvider -> do
     let appTracer = makeTracer tracerProvider "app" tracerOptions
     f App {..}
+
+noopSpanExporter :: SpanExporter
+noopSpanExporter =
+  SpanExporter
+    { spanExporterExport = const $ pure Success
+    , spanExporterShutdown = pure Trace.ShutdownSuccess
+    , spanExporterForceFlush = pure Trace.FlushSuccess
+    }
 
 spec :: Spec
 spec = withApp loadApp $ do
@@ -52,16 +70,17 @@ spec = withApp loadApp $ do
     it "sets request headers from existing context" $ appExample @App $ do
       inSpan "example" defaultSpanArguments $ do
         spanContext <- assertCurrentSpanContext
+        headers <- injectContext ([] :: [Header])
 
-        let expectedTraceParent =
-              toTraceParent
-                (traceIdToHex $ Trace.traceId spanContext)
-                (spanIdToHex $ Trace.spanId spanContext)
+        let headerTraceParent = do
+              bs <- List.lookup "traceparent" headers
+              fromTraceParent $ T.decodeUtf8 bs
 
-        injectContext ([] :: [Header])
-          `shouldReturn` [ ("traceparent", T.encodeUtf8 expectedTraceParent)
-                         , ("tracestate", "")
-                         ]
+        fmap fst headerTraceParent
+          `shouldBe` Just (traceIdToHex $ Trace.traceId spanContext)
+        fmap snd headerTraceParent
+          `shouldBe` Just (spanIdToHex $ Trace.spanId spanContext)
+        List.lookup "tracestate" headers `shouldBe` Just ""
 
   describe "extractContext" $ do
     it "sets the context from the headers" $ appExample @App $ do
@@ -163,11 +182,9 @@ toTraceParent :: Text -> Text -> Text
 toTraceParent traceId spanId = "00-" <> traceId <> "-" <> spanId <> "-00"
 
 fromTraceParent :: Text -> Maybe (Text, Text)
-fromTraceParent a = do
-  b <- T.stripPrefix "00-" a
-  c <- T.stripSuffix "-00" b
-  [traceId, spanId] <- Just $ T.splitOn "-" c
-  pure (traceId, spanId)
+fromTraceParent a = case T.splitOn "-" a of
+  [_version, traceId, spanId, _flags] -> Just (traceId, spanId)
+  _ -> Nothing
 
 expectationFailure :: (HasCallStack, MonadIO m) => String -> m a
 expectationFailure msg = Hspec.expectationFailure msg >> error "unreachable"

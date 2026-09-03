@@ -10,6 +10,9 @@ changes from that upgrade are visible through this package's own functions:
   `SpanProcessor` configured (e.g. `OTEL_TRACES_EXPORTER=none`)
 - `extractContext`, `injectContext`, and `processWithContext` keep propagating trace context via
   headers even when `OTEL_SDK_DISABLED=true`, where they previously became no-ops
+- the `traceparent` header `injectContext`/`processWithContext` write for a sampled root span now
+  has its trailing flags byte set to `03` (sampled, plus the new W3C Trace Context "random trace
+  ID" bit), where it was previously `00`
 
 ## [v0.0.0.3](https://github.com/freckle/freckle-otel/compare/v0.0.0.2...v0.0.0.3)
 
