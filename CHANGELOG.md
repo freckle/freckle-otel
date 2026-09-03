@@ -1,4 +1,24 @@
-## [_Unreleased_](https://github.com/freckle/freckle-otel/compare/v0.0.0.3...main)
+## [_Unreleased_](https://github.com/freckle/freckle-otel/compare/v0.1.0.0...main)
+
+## [v0.1.0.0](https://github.com/freckle/freckle-otel/compare/v0.0.0.3...v0.1.0.0)
+
+Drops support for GHC 9.2 and GHC 9.4. `hs-opentelemetry-sdk`'s OTLP exporter now depends on a
+`tls`/`crypton` stack too recent to satisfy against those two GHC versions' package sets. GHC 9.6
+is now the oldest supported version, which also drops support for `base` 4.16 and 4.17.
+
+Require `hs-opentelemetry-api` and `hs-opentelemetry-sdk` at `1.0.0.0` or later. A few behavior
+changes from that upgrade are visible through this package's own functions:
+
+- `withTracerProvider`'s shutdown now applies a default 5 second timeout instead of waiting
+  indefinitely
+- `inSpan`, and so `getCurrentSpanContext`, `getCurrentTraceId`, `addCurrentSpanAttributes`, and
+  `withTraceContext`, no longer see the current span when the `TracerProvider` has no
+  `SpanProcessor` configured (e.g. `OTEL_TRACES_EXPORTER=none`)
+- `extractContext`, `injectContext`, and `processWithContext` keep propagating trace context via
+  headers even when `OTEL_SDK_DISABLED=true`, where they previously became no-ops
+- the `traceparent` header `injectContext`/`processWithContext` write for a sampled root span now
+  has its trailing flags byte set to `03` (sampled, plus the new W3C Trace Context "random trace
+  ID" bit), where it was previously `00`
 
 ## [v0.0.0.3](https://github.com/freckle/freckle-otel/compare/v0.0.0.2...v0.0.0.3)
 

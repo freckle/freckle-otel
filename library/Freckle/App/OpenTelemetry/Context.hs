@@ -38,7 +38,14 @@ import Network.HTTP.Simple (setRequestHeaders)
 import Network.HTTP.Types.Header (Header)
 import OpenTelemetry.Context (Context)
 import OpenTelemetry.Context.ThreadLocal (attachContext, getContext)
-import OpenTelemetry.Propagator (Propagator, extract, inject)
+import OpenTelemetry.Propagator
+  ( Propagator
+  , TextMap
+  , extract
+  , inject
+  , textMapFromList
+  , textMapToList
+  )
 import OpenTelemetry.Trace.Core
   ( getTracerProviderPropagators
   , getTracerTracerProvider
@@ -89,7 +96,7 @@ extractContext
 extractContext a = do
   context <- getContext
   propagator <- getPropagator
-  updatedContext <- extract propagator (a ^. headersL) context
+  updatedContext <- extract propagator (headersToTextMap $ a ^. headersL) context
   void $ attachContext updatedContext
 
 -- | Inject our trace context into the given item's headers
@@ -98,12 +105,20 @@ injectContext
 injectContext a = do
   context <- getContext
   propagator <- getPropagator
-  headers <- inject propagator context $ a ^. headersL
+  headers <-
+    textMapToHeaders
+      <$> inject propagator context (headersToTextMap $ a ^. headersL)
   pure $ a & headersL .~ headers
 
-getPropagator :: MonadTracer m => m (Propagator Context [Header] [Header])
+getPropagator :: MonadTracer m => m (Propagator Context TextMap TextMap)
 getPropagator =
   getTracerProviderPropagators . getTracerTracerProvider <$> getTracer
+
+headersToTextMap :: [Header] -> TextMap
+headersToTextMap = textMapFromList . map decode
+
+textMapToHeaders :: TextMap -> [Header]
+textMapToHeaders = map encode . textMapToList
 
 -- | Process an item (a request, a Job, etc) in a top-level span and context
 processWithContext
