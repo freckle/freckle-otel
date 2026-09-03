@@ -1,4 +1,4 @@
-## [_Unreleased_](https://github.com/freckle/freckle-otel/compare/v0.0.0.3...main)
+## [v0.1.0.0](https://github.com/freckle/freckle-otel/compare/v0.0.0.3...v0.1.0.0)
 
 Drops support for GHC 9.2 and GHC 9.4. `hs-opentelemetry-sdk`'s OTLP exporter now depends on a
 `tls`/`crypton` stack too recent to satisfy against those two GHC versions' package sets. GHC 9.6
