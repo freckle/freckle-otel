@@ -4,8 +4,7 @@
 
 Drops support for GHC 9.2 and GHC 9.4. `hs-opentelemetry-sdk`'s OTLP exporter now depends on a
 `tls`/`crypton` stack too recent to satisfy against those two GHC versions' package sets. GHC 9.6
-is now the oldest supported version, which also raises the effective `base` lower bound from
-`base-4.16.4.0` to `base-4.18.2.1`.
+is now the oldest supported version, which also drops support for `base` 4.16 and 4.17.
 
 Require `hs-opentelemetry-api` and `hs-opentelemetry-sdk` at `1.0.0.0` or later. A few behavior
 changes from that upgrade are visible through this package's own functions:
