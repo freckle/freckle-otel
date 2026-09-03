@@ -73,7 +73,7 @@ import Data.Text.Encoding qualified as T
 import Data.Text.Encoding.Error qualified as T
 import OpenTelemetry.Context (lookupSpan)
 import OpenTelemetry.Context.ThreadLocal (getContext)
-import OpenTelemetry.Trace hiding (inSpan)
+import OpenTelemetry.Trace hiding (inSpan, withTracerProvider)
 import OpenTelemetry.Trace.Core (getSpanContext)
 import OpenTelemetry.Trace.Core qualified as Trace (SpanContext (..))
 import OpenTelemetry.Trace.Id
@@ -124,7 +124,7 @@ withTracerProvider :: MonadUnliftIO m => (TracerProvider -> m a) -> m a
 withTracerProvider =
   bracket
     (liftIO initializeGlobalTracerProvider)
-    (liftIO . shutdownTracerProvider)
+    (void . liftIO . flip shutdownTracerProvider Nothing)
 
 getCurrentTraceId :: MonadIO m => m (Maybe TraceId)
 getCurrentTraceId = fmap Trace.traceId <$> getCurrentSpanContext

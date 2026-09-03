@@ -1,5 +1,7 @@
 ## [_Unreleased_](https://github.com/freckle/freckle-otel/compare/v0.0.0.3...main)
 
+Require `hs-opentelemetry-api` and `hs-opentelemetry-sdk` at `1.0.0.0` or later
+
 ## [v0.0.0.3](https://github.com/freckle/freckle-otel/compare/v0.0.0.2...v0.0.0.3)
 
 Metadata change only; moved source repository.
